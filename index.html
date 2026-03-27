@@ -865,9 +865,10 @@ async function saveData() {
 async function syncDespesaToSupabase(item, action='upsert') {
   try {
     if (action === 'upsert') {
-      await sb.upsert('despesas', {id:item.id, descricao:item.descricao, obs:item.obs, data:item.data, pago:item.pago, valor:item.valor});
+      await sb.upsert('despesas', {id:item.id, descricao:item.descricao, obs:item.obs, data:item.data, pago:item.pago, valor:item.valor, source:'erp'});
     } else if (action === 'delete') {
-      await sb.del('despesas', 'id', item.id);
+      // Marcar como erp_deleted com dados completos para o sync worker localizar a linha no Excel
+      await sb.upsert('despesas', {id:item.id, descricao:item.descricao, obs:item.obs, data:item.data, pago:item.pago, valor:item.valor, source:'erp_deleted'});
     }
   } catch(e) { console.warn('Sync despesa failed:', e); }
 }
@@ -875,9 +876,10 @@ async function syncDespesaToSupabase(item, action='upsert') {
 async function syncOutroToSupabase(item, action='upsert') {
   try {
     if (action === 'upsert') {
-      await sb.upsert('outros', {id:item.id, cat:item.cat, data:item.data, valor:item.valor});
+      await sb.upsert('outros', {id:item.id, cat:item.cat, data:item.data, valor:item.valor, source:'erp'});
     } else if (action === 'delete') {
-      await sb.del('outros', 'id', item.id);
+      // Marcar como erp_deleted com dados completos para o sync worker localizar a linha no Excel
+      await sb.upsert('outros', {id:item.id, cat:item.cat, data:item.data, valor:item.valor, source:'erp_deleted'});
     }
   } catch(e) { console.warn('Sync outro failed:', e); }
 }
@@ -1028,8 +1030,11 @@ function renderDespesas() {
 
 function deleteDespesa(id) {
   if(!confirm('Excluir este lançamento?')) return;
+  const item = DATA.despesas.find(d=>d.id===id);
   DATA.despesas = DATA.despesas.filter(d=>d.id!==id);
-  saveData();syncDespesaToSupabase({id},'delete');renderDespesas();renderDashboard();
+  saveData();
+  if(item) syncDespesaToSupabase(item,'delete');
+  renderDespesas();renderDashboard();
   showToast('Lançamento excluído');
 }
 
@@ -1108,8 +1113,11 @@ function renderOutros() {
 
 function deleteOutro(id) {
   if(!confirm('Excluir?')) return;
+  const item = DATA.outros.find(d=>d.id===id);
   DATA.outros = DATA.outros.filter(d=>d.id!==id);
-  saveData();syncOutroToSupabase({id},'delete');renderOutros();showToast('Removido');
+  saveData();
+  if(item) syncOutroToSupabase(item,'delete');
+  renderOutros();showToast('Removido');
 }
 
 // ============================================================
