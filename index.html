@@ -563,6 +563,7 @@ const SUPPLIER_ALIASES = {
   "TELEPAR": "TELEPAR PARAFUSOS",
   "LT DECORACAO": "LT DECORACOES",
   "LT DECORACOES": "LT DECORACOES",
+  "LT DECORACOES": "LT DECORACOES",
 };
 function canonicalSupplier(name) {
   const n = norm(name);
@@ -589,7 +590,7 @@ async function loadFromSupabase() {
     const validDespesas = despRes.data.filter(d => d.source !== 'erp_deleted');
     const validOutros = outrosRes.data.filter(o => o.source !== 'erp_deleted');
 
-    const lt = finRes.data.filter(f => f.empresa === 'LT Decoracoes' || (f.empresa||'').includes('LT')).map(f => ({desc: f.descricao, valor: f.valor}));
+    const lt = finRes.data.filter(f => f.empresa === 'LT Decoraçoes' || (f.empresa||'').includes('LT')).map(f => ({desc: f.descricao, valor: f.valor}));
     const just = finRes.data.filter(f => f.empresa === 'Just Smile' || (f.empresa||'').includes('Just')).map(f => ({desc: f.descricao, valor: f.valor}));
     DATA = {
       despesas: validDespesas.map(d => ({id:d.id, descricao:(d.descricao||'').trim(), obs:d.obs||'', data:d.data, pago:(d.pago||'').trim(), valor:Number(d.valor)})),
@@ -985,13 +986,13 @@ function renderFinanceiro(c) {
   const f = DATA.financeiro;
 
   document.getElementById('fin-summary').innerHTML = `
-    <div class="card stat-highlight"><div class="number" style="color:var(--accent-light)">${fmtShort(c.saldoLT)}</div><div class="label">Saldo LT Decoracoes</div></div>
+    <div class="card stat-highlight"><div class="number" style="color:var(--accent-light)">${fmtShort(c.saldoLT)}</div><div class="label">Saldo LT Decoraçoes</div></div>
     <div class="card stat-highlight"><div class="number" style="color:var(--cyan)">${fmtShort(c.saldoJS)}</div><div class="label">Saldo Just Smile</div></div>
     <div class="card stat-highlight"><div class="number" style="color:${c.saldo>=0?'var(--green)':'var(--red)'}">${fmtShort(c.saldo)}</div><div class="label">Saldo Liquido</div></div>
   `;
 
   const all = [
-    ...f.lt.map(i=>({...i,tipo:'LT Decoracoes'})),
+    ...f.lt.map(i=>({...i,tipo:'LT Decoraçoes'})),
     ...f.just.map(i=>({...i,tipo:'Just Smile'}))
   ];
   document.getElementById('financeiro-table').innerHTML = all.map(r=>{
@@ -1127,7 +1128,7 @@ function openModal(type) {
       <div class="form-group"><label>Descricao</label><input id="ff-desc" placeholder="Ex: Aporte"></div>
       <div class="form-row">
         <div class="form-group"><label>Valor (R$)</label><input type="number" id="ff-valor" step="0.01" placeholder="Negativo = saida"></div>
-        <div class="form-group"><label>Conta</label><select id="ff-conta"><option value="lt">LT Decoracoes</option><option value="just">Just Smile</option></select></div>
+        <div class="form-group"><label>Conta</label><select id="ff-conta"><option value="lt">LT Decoraçoes</option><option value="just">Just Smile</option></select></div>
       </div>
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
