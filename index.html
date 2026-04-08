@@ -593,7 +593,7 @@ async function loadFromSupabase() {
     const lt = finRes.data.filter(f => f.empresa === 'LT Decoraçoes' || (f.empresa||'').includes('LT')).map(f => ({desc: f.descricao, valor: f.valor}));
     const just = finRes.data.filter(f => f.empresa === 'Just Smile' || (f.empresa||'').includes('Just')).map(f => ({desc: f.descricao, valor: f.valor}));
     DATA = {
-      despesas: validDespesas.map(d => ({id:d.id, descricao:(d.descricao||'').trim(), obs:d.obs||'', data:d.data, pago:(d.pago||'').trim(), valor:Number(d.valor)})),
+      despesas: validDespesas.map(d => ({id:d.id, descricao:(d.descricao||'').trim(), obs:d.obs||'', data:d.data, pago:canonicalPayer(d.pago), valor:Number(d.valor)})),
       outros: validOutros.map(o => ({id:o.id, cat:o.cat, data:o.data, valor:Number(o.valor)})),
       financeiro: { lt, just },
       nextId: Math.max(...despRes.data.map(d=>d.id), 199) + 1,
@@ -691,7 +691,14 @@ function getCatColor(c) {
   return `hsl(${hue},55%,55%)`;
 }
 
-const badgeClass = p => (p||'').toLowerCase().includes('just')?'badge-cyan':'badge-purple';
+// Canonical payer: only two companies exist
+function canonicalPayer(p) {
+  if (!p) return 'LT Decoraçoes';
+  const low = stripAccents(p).toLowerCase().trim();
+  if (low.includes('just') || low.includes('smile')) return 'Just Smile';
+  return 'LT Decoraçoes';
+}
+const badgeClass = p => canonicalPayer(p)==='Just Smile'?'badge-cyan':'badge-purple';
 
 // ============================================================
 // CENTRALIZED CALCULATIONS (single source of truth)
