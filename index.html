@@ -121,6 +121,11 @@ tbody tr:hover td{background:rgba(255,255,255,0.02);color:var(--text)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all var(--transition);font-family:inherit}
 .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn-primary:hover{background:#7c3aed;border-color:#7c3aed;box-shadow:0 0 20px rgba(139,92,246,0.2)}
+.btn-outline{background:transparent;color:var(--accent-light);border-color:var(--border)}
+.btn-outline:hover{background:var(--accent-bg);border-color:var(--accent);color:#fff}
+.btn-outline:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline .spinner{display:inline-block;width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .btn-ghost{background:transparent;color:var(--text-secondary);border-color:var(--border)}
 .btn-ghost:hover{background:rgba(255,255,255,0.04);color:var(--text);border-color:var(--border-light)}
 .btn-danger{background:var(--red-bg);color:var(--red);border-color:rgba(239,68,68,0.15)}
@@ -424,6 +429,7 @@ tbody tr:hover td{background:rgba(255,255,255,0.02);color:var(--text)}
       </div>
       <div class="header-actions">
         <span class="recon-status" id="recon-badge"><i class="ri-check-line"></i> --</span>
+        <button class="btn btn-outline" id="btn-sync" onclick="forceSync()"><i class="ri-calendar-check-line"></i> Sincronizar</button>
         <button class="btn btn-primary" onclick="openModal('add')"><i class="ri-add-line"></i> Nova Despesa</button>
       </div>
     </div>
@@ -786,6 +792,23 @@ function loadData() {
     try { DATA = JSON.parse(saved); if(!DATA.nextId) DATA.nextId=200; if(!DATA.nextOutroId) DATA.nextOutroId=100; } catch(e) {}
   }
   loadFromSupabase().then(() => renderCurrentView());
+}
+
+async function forceSync() {
+  const btn = document.getElementById('btn-sync');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
+  try {
+    await loadFromSupabase();
+    renderCurrentView();
+    showToast('Dados sincronizados com sucesso!');
+  } catch(e) {
+    showToast('Erro ao sincronizar: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ri-calendar-check-line"></i> Sincronizar';
+  }
 }
 
 async function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
