@@ -679,7 +679,15 @@ tbody tr:hover td{background:rgba(255,255,255,0.02);color:var(--text)}
 // ============================================================
 const SUPABASE_URL = 'https://supa.projectum.com.br';
 const SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3NDU2MDMwMCwiZXhwIjo0OTMwMjMzOTAwLCJyb2xlIjoiYW5vbiJ9.4ja2gAaohIbT7zs3rW3LhUrR1sF6DQzy5S3aP-Xt-DA';
-const SB_HEADERS = {'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json'};
+const SUPABASE_SCHEMA = 'galpao';
+const SB_HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+  'Content-Type': 'application/json',
+  // PostgREST schema routing — read/write precisam do schema dedicado
+  'Accept-Profile': SUPABASE_SCHEMA,
+  'Content-Profile': SUPABASE_SCHEMA,
+};
 const sb = {
   async select(table, order) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&order=${order||'id'}`, {headers:SB_HEADERS});
